@@ -51,6 +51,8 @@
             this.mnuSetup = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.退出ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.刷新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.heartbeat = new System.Windows.Forms.Timer(this.components);
             this.plHead.SuspendLayout();
             this.plTitle.SuspendLayout();
             this.btnPage.SuspendLayout();
@@ -118,6 +120,7 @@
             this.ilMenu.Images.SetKeyName(2, "右删除@2x.png");
             this.ilMenu.Images.SetKeyName(3, "lightning.png");
             this.ilMenu.Images.SetKeyName(4, "返回@2x.png");
+            this.ilMenu.Images.SetKeyName(5, "Close_8_8.png");
             // 
             // btnPage
             // 
@@ -148,8 +151,9 @@
             // 
             this.ilTitle.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ilTitle.ImageStream")));
             this.ilTitle.TransparentColor = System.Drawing.Color.Transparent;
-            this.ilTitle.Images.SetKeyName(0, "没选择@2x.png");
+            this.ilTitle.Images.SetKeyName(0, "没选择@1.png");
             this.ilTitle.Images.SetKeyName(1, "选择@2x.png");
+            this.ilTitle.Images.SetKeyName(2, "没选择@2x.png");
             // 
             // plSystem
             // 
@@ -261,9 +265,10 @@
             // 
             this.mnuSetup.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.设置ToolStripMenuItem,
-            this.退出ToolStripMenuItem});
+            this.退出ToolStripMenuItem,
+            this.刷新ToolStripMenuItem});
             this.mnuSetup.Name = "mnuSetup";
-            this.mnuSetup.Size = new System.Drawing.Size(101, 48);
+            this.mnuSetup.Size = new System.Drawing.Size(101, 70);
             this.mnuSetup.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.mnuSetup_ItemClicked);
             // 
             // 设置ToolStripMenuItem
@@ -278,6 +283,16 @@
             this.退出ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.退出ToolStripMenuItem.Text = "退出";
             // 
+            // 刷新ToolStripMenuItem
+            // 
+            this.刷新ToolStripMenuItem.Name = "刷新ToolStripMenuItem";
+            this.刷新ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.刷新ToolStripMenuItem.Text = "刷新";
+            // 
+            // heartbeat
+            // 
+            this.heartbeat.Tick += new System.EventHandler(this.heartbeat_Tick);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -289,6 +304,8 @@
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "地藤标准版";
+            this.Activated += new System.EventHandler(this.FrmMain_Activated);
+            this.Leave += new System.EventHandler(this.FrmMain_Leave);
             this.plHead.ResumeLayout(false);
             this.plTitle.ResumeLayout(false);
             this.btnPage.ResumeLayout(false);
@@ -322,6 +339,8 @@
         private System.Windows.Forms.ContextMenuStrip mnuSetup;
         private System.Windows.Forms.ToolStripMenuItem 设置ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 退出ToolStripMenuItem;
+        private System.Windows.Forms.Timer heartbeat;
+        private System.Windows.Forms.ToolStripMenuItem 刷新ToolStripMenuItem;
     }
 }
 

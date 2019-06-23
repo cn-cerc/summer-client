@@ -56,6 +56,9 @@
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -75,7 +78,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CallTaobaoBrowser.cs" />
+    <Compile Include="CallElectronicBrowser.cs" />
     <Compile Include="Computer.cs" />
+    <Compile Include="FrmElectronicBrowser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmElectronicBrowser.Designer.cs">
+      <DependentUpon>FrmElectronicBrowser.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,16 +99,35 @@
     <Compile Include="FrmStartup.Designer.cs">
       <DependentUpon>FrmStartup.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmTaobaoBrowser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTaobaoBrowser.Designer.cs">
+      <DependentUpon>FrmTaobaoBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HeartBeatCheck.cs" />
+    <Compile Include="HotKey.cs" />
+    <Compile Include="JavaScriptProxy.cs" />
     <Compile Include="MyApp.cs" />
     <Compile Include="PageControl.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SetMenuList.cs" />
+    <Compile Include="StartVine.cs" />
+    <Compile Include="TabPageContorl.cs" />
     <Compile Include="TitleControl.cs" />
+    <Compile Include="TmallDecode.cs" />
+    <EmbeddedResource Include="FrmElectronicBrowser.resx">
+      <DependentUpon>FrmElectronicBrowser.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmStartup.resx">
       <DependentUpon>FrmStartup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmTaobaoBrowser.resx">
+      <DependentUpon>FrmTaobaoBrowser.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -109,7 +139,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="Properties\app.manifest" />
+    <None Include="Properties\app.manifest">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -141,6 +173,7 @@
   <ItemGroup>
     <Content Include="bitbug_favicon.ico" />
     <Content Include="Newtonsoft.Json.dll" />
+    <None Include="Resources\Close_8_8.png" />
     <None Include="Resources\按钮1_2x.png" />
     <None Include="Resources\背景_2x.png" />
     <None Include="Resources\首页-2%402x.png" />

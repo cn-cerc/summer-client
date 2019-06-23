@@ -1,12 +1,16 @@
 ﻿using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -24,6 +28,9 @@ namespace vine_window_standard
         private extern static bool ReleaseCapture();
         [DllImport("user32.dll")]
         private extern static int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        private delegate void HttpOnResponse(WebClient client, String resp);
+        [DllImport("user32.dll")]
+        public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
 
         internal void loadUrl(string url)
         {
@@ -140,7 +147,10 @@ namespace vine_window_standard
             if (mnuTitle.Items.Count > 1)
                 mnuTitle.Items[1].Visible = titles.Index > 0;
             mnuTitle.Show(control, new Point(4, control.Height - 5));
-            titles.setTitle(pageControl.Index, pageControl.browser.DocumentTitle);
+            if (pageControl.browser.DocumentTitle != pageControl.browser.Url.ToString())
+                titles.setTitle(pageControl.Index, pageControl.browser.DocumentTitle);
+            else
+                titles.setTitle(pageControl.Index, "打印报表");
         }
 
         private void newPageClick(object sender, EventArgs e)
@@ -162,19 +172,21 @@ namespace vine_window_standard
             pageControl.browser.NewWindow += this.webBrowser1_NewWindow;
             pageControl.browser.DocumentCompleted += this.webBrowser1_DocumentCompleted;
             pageControl.browser.Url = new Uri(url);
+            
         }
 
         private void closePageClick(object sender, EventArgs e)
         {
             Control item = (Control)((Control)sender).Tag;
             int index = titles.IndexOf(item);
-            titles.Remove(index);
             pageControl.Delete(index);
+            titles.Remove(index);
             pageControl.Index = index - 1;
             titles.Index = index - 1;
 
             Control last = titles.getItem(titles.Count - 1);
             btnNew.Left = last.Left + last.Width + 10;
+            registerTitle();
         }
 
         private void btnSystemButtonClick(object sender, EventArgs e)
@@ -197,7 +209,10 @@ namespace vine_window_standard
         {
             WebBrowser browser = (WebBrowser)sender;
             var index = pageControl.Items.IndexOf(browser);
-            titles.setTitle(index, browser.DocumentTitle);
+            if (browser.DocumentTitle != browser.Url.ToString())
+                titles.setTitle(index, browser.DocumentTitle);
+            else
+                titles.setTitle(index, "打印报表");
         }
 
         private void plTitle_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -295,6 +310,12 @@ namespace vine_window_standard
                         Application.Exit();
                         break;
                     }
+                case 2: //刷新
+                    {
+                        WebBrowser wb = pageControl.Items[pageControl.Index];
+                        wb.Document.ExecCommand("Refresh", false, null);
+                        break;
+                    }
                 default:
                     {
                         break;
@@ -302,29 +323,11 @@ namespace vine_window_standard
             }
         }
 
-        public class MnuTitle
+        public String send(String classCode, String req)
         {
-            public List<Data> data { get; set; }
-        }
-
-        public class Data
-        {
-            public string name { get; set; }
-            public string href { get; set; }
-        }
-
-        public void setMenuTitle(string menuItems)
-        {
-            MnuTitle jTitleList = Newtonsoft.Json.JsonConvert.DeserializeObject<MnuTitle>(menuItems);
-            ContextMenuStrip mtitle = titles.gettitle(titles.index);
-            TitleInit(mtitle);
-            foreach (var item in jTitleList.data)
-            {
-                ToolStripMenuItem mi = new ToolStripMenuItem();
-                mi.Text = item.name;
-                mi.Tag = item.href;
-                mtitle.Items.Add(mi);
-            }
+            JavaScriptProxy proxy = new JavaScriptProxy(this);
+            JObject result = proxy.execute(classCode, req);
+            return result.ToString();
         }
 
         public void TitleInit(ContextMenuStrip title)
@@ -343,6 +346,100 @@ namespace vine_window_standard
                 CreateParams cp = base.CreateParams;
                 cp.Style = cp.Style | WS_MINIMIZEBOX;   
                 return cp;
+            }
+        }
+
+        public void SetTitle(ContextMenuStrip title)
+        {
+            titles.setMenu(title, titles.index);
+        }
+
+        public void heartbeatCheck(bool status, int time)
+        {
+            this.heartbeat.Interval = time * 60000;
+            this.heartbeat.Enabled = status;
+        }
+        
+        private void heartbeat_Tick(object sender, EventArgs e)
+        {
+            ThreadStart thread = () =>
+            {
+                string formCode = String.Format("WebDefault.heartbeatCheck?CLIENTID={0}&device={1}&sid={2}", Computer.getClientID(), "pc", MyApp.getInstance().getToken());
+                string url = MyApp.getInstance().getFormUrl(formCode);
+                var client = new WebClient();
+                client.Encoding = System.Text.Encoding.GetEncoding("utf-8");
+                string resp = client.DownloadString(url);
+
+                HttpOnResponse httpResp = httpOnResponse;
+                this.Invoke(httpResp, client, resp);
+            };
+            new Thread(thread).Start();
+        }
+
+        private void httpOnResponse(WebClient client, string resp)
+        {
+            ;
+        }
+
+        public void RefreshHost(string sid, string host)
+        {
+            int index = titles.Index;
+            WebBrowser wb = pageControl.Items[index];
+            string newUrl = host + wb.Url.AbsolutePath + String.Format("?CLIENTID={0}&device={1}&sid={2}", Computer.getClientID(), "pc", sid);
+            createWindow(newUrl);
+
+            titles.Remove(index);
+            pageControl.Delete(index);
+
+            Control last = titles.getItem(titles.Count - 1);
+            btnNew.Left = last.Left + last.Width + 10;
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_HOTKEY = 0x0312;//按快捷键  
+            switch (m.Msg)
+            {
+                case WM_HOTKEY:
+                    switch (m.WParam.ToInt32())
+                    {
+                        case 100:    //按下的是F5
+                            {
+                                //模拟按下Alt键
+                                keybd_event(HotKey.vbKeyAlt, 0, 0, 0);
+                                //模拟按下F5键
+                                keybd_event(HotKey.vbKeyF5, 0, 0, 0);
+                                //松开按键Alt
+                                keybd_event(HotKey.vbKeyAlt, 0, 2, 0);
+                                //松开按键F5
+                                keybd_event(HotKey.vbKeyF5, 0, 2, 0);
+                            }
+                            break;
+                    }
+                    break;
+            }
+            base.WndProc(ref m);
+        }
+
+        private void FrmMain_Activated(object sender, EventArgs e)
+        {
+            HotKey.RegisterHotKey(Handle, 100, 0, Keys.F5);
+        }
+
+        private void FrmMain_Leave(object sender, EventArgs e)
+        {
+            HotKey.UnregisterHotKey(Handle, 100);
+        }
+
+        private void registerTitle()
+        {
+            for (int i = 0; i < pageControl.Items.Count; i++)
+            {
+                WebBrowser browser = (WebBrowser)pageControl.Items[i];
+                if (browser.DocumentTitle != browser.Url.ToString())
+                    titles.setTitle(i, browser.DocumentTitle);
+                else
+                    titles.setTitle(i, "打印报表");
             }
         }
     }

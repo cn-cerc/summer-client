@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace vine_window_standard
 {
@@ -21,7 +22,7 @@ namespace vine_window_standard
 
     public partial class FrmStartup : Form
     {
-        private static Int32 ieMinVersion = 11001;
+        private static Int32 ieMinVersion = 9999;//11001;
         private bool appUpdateReset = false;
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HT_CAPTION = 0x2;
@@ -49,6 +50,10 @@ namespace vine_window_standard
 
                 this.FormBorderStyle = FormBorderStyle.None;
                 txtUrl.Text = String.Format("http://{0:G}", Computer.getIPAddress());
+                if (MyApp.debug)
+                {
+                    this.AcceptButton = btnStart;
+                }
 
                 if (Screen.PrimaryScreen.Bounds.Width < 1360)
                 {
@@ -57,8 +62,15 @@ namespace vine_window_standard
                     System.Environment.Exit(0);
                     return;
                 }
+                if (checkAdobeReader() == false)
+                {
+                    MessageBoxButtons messButton = MessageBoxButtons.OK;
+                    DialogResult dr = MessageBox.Show("尚未安裝Adobe Acrobat Reader软件, 请质询客服协助安装", " 环境检测", messButton);
+                    System.Environment.Exit(0);
+                    return;
+                }
 
-                timer1.Enabled = true;
+                timer1.Enabled = !MyApp.debug;
             }
             catch (System.Security.SecurityException ee)
             {
@@ -179,6 +191,15 @@ namespace vine_window_standard
             {
                 startMainForm();
             }
+        }
+
+        private bool checkAdobeReader()
+        {
+            var adobePath = Registry.GetValue(@"HKEY_CLASSES_ROOT\Software\Adobe\Acrobat\Exe", string.Empty, string.Empty);
+            if (adobePath != null)
+                return true;
+            else
+                return false;
         }
     }
 }

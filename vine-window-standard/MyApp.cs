@@ -9,15 +9,16 @@ namespace vine_window_standard
 {
     class MyApp
     {
-        private static string currentVersion = "1.0.0.0";
+        private static string currentVersion = "1.0.0.6";
         public static string AppCode = "vine-windows-standard";
         private static MyApp instance;
-        public static String HOME_URL = "https://m.knowall.cn";
+        public static String HOME_URL = "https://www.diteng.site";
        // public static String HOME_URL = "http://192.168.31.247";
-        public static String FORMS = "form";
+        public static String FORMS = "forms";
         public static String SERVICES = "services";
         internal static string APP_NAME = "地藤标准版";
         public static bool debug = false;
+        public string token = "";
 
         public string AppVersion { get; private set; } = "0.0.0.0";
 
@@ -46,6 +47,16 @@ namespace vine_window_standard
         internal String getCurrentVersion()
         {
             return currentVersion;
+        }
+
+        internal String getToken()
+        {
+            return token;
+        }
+
+        internal void setToken(String token)
+        {
+            this.token = token;
         }
     }
 }
