@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
+using Spire.Pdf;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -692,8 +693,7 @@ namespace vine_window_standard
                     key.SetValue("margin_left", 0);   //设置左页边距为0
                     key.SetValue("margin_right", 0);  //设置右页边距为0
                     key.SetValue("margin_top", 0);   //设置上页边距为0
-
-                    //设置默认打印机
+                     //设置默认打印机
                     if (Printer != "")
                         Externs.SetDefaultPrinter(Printer);
                     Console.WriteLine("接收打印信息 " + DateTime.Now.ToString());
